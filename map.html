@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+
+    <title>Document</title>
+    <style>
+        * {
+        padding:0;
+        margin:0;
+        border:none;
+        box-sizing: border-box;
+        }
+        body{
+            background-color: yellow;
+            font-family: Helvetica, Arial, sans-serif;
+            font-size:15px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .card {
+            background-color: green;
+            border-radius: 20px;
+            box-shadow: 0 4px 8px black;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 200px;
+            text-align: center;
+            padding:24px;
+        }
+        .card:hover {
+            transform: translateY(-10px);
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: red;
+            overflow-y: auto;
+            z-index: 1000;
+        }
+        .modal-content {
+            background-color: teal;
+            margin: 50px auto;
+            padding: 20px;
+            border-radius: 8px;
+            width: 80%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: row;
+            gap: 20px;
+        }
+                .modal-text {
+            flex: 1;
+        }
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 2em;
+            color: #030000;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div>
+    <h1>Hello Jo!</h1>
+    <!-- how are you today? -->
+    </div>
+
+    <div class="container" id="content"></div>
+     <div class="modal" id="modal">
+        <div class="modal-close" id="modal-close">&times;</div>
+        <div class="modal-content" id="modal-content">
+            <div class="modal-text" id="modal-text"></div>
+            <!-- If you plan to add images to the modal later, you can add a div for them here -->
+            <!-- <div class="modal-images" id="modal-images"></div> -->
+        </div>
+    </div>
+<script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Path to your CSV file
+            const csvFilePath = 'academics_data.csv';
+
+            // Function to create HTML for each item
+            function createItemHTML(item) {
+                const card = document.createElement('div');
+                card.className = 'card';
+                card.dataset.item = JSON.stringify(item);
+
+                // const img = document.createElement('img'); // This was commented out
+                // img.src = item.thumbnail;                 // This was commented out
+                // img.alt = 'Thumbnail';                    // This was commented out
+
+                const title = document.createElement('div');
+                title.className = 'card-title';
+                title.textContent = item.Name; // Assumes 'Name' is a column in your CSV
+
+                // card.appendChild(img); // This line will cause an error if img is not defined
+                card.appendChild(title);
+
+                // Add click event to open modal
+                card.addEventListener('click', function() {
+                    openModal(item);
+                });
+
+                return card;
+            }
+
+            // Function to display data
+            function displayData(data) {
+                const contentDiv = document.getElementById('content');
+                data.forEach(item => {
+                    const card = createItemHTML(item);
+                    contentDiv.appendChild(card);
+                });
+            }
+
+            function openModal(item) {
+                const modal = document.getElementById('modal');
+                // This will now find the element after you update the HTML (Suggestion 1)
+                const modalText = document.getElementById('modal-text');
+
+                // Use backticks for template literals
+                modalText.innerHTML = `
+                    <h2>${item.Name}</h2>
+                    <p><strong>Institution:</strong> ${item.Institution}</p>
+                    <p><strong>City:</strong> ${item.City}</p>
+                    <p><strong>Country:</strong> ${item.Country}</p>
+                `;
+                // Ensure your academics_data.csv has 'Name', 'Institution', 'City', and 'Country' columns.
+
+                // The modal-images part is commented out, which is fine if you're not using it yet.
+                // const modalImages = document.getElementById('modal-images');
+                // modalImages.innerHTML = `
+                //     <img src="${item.image}" alt="Image">
+                //     <img src="${item.secondimage}" alt="Second Image">
+                // `;
+
+                modal.style.display = 'block';
+            }
+            // Function to close modal
+            function closeModal() {
+                const modal = document.getElementById('modal');
+                modal.style.display = 'none';
+            }
+
+            // Add event listener to close button
+            document.getElementById('modal-close').addEventListener('click', closeModal);
+
+            // Parse CSV file
+            Papa.parse(csvFilePath, {
+                download: true,
+                header: true,
+                complete: function(results) {
+                    displayData(results.data);
+                }
+            });
+        });
+    </script>
+</body>
+</html>
